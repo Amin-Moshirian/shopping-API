@@ -17,7 +17,7 @@ const checkLogin = (req: Request, res: Response, next: NextFunction): void => {
     req.username = user.data
     next();
   } catch (error: unknown) {
-    next({ status: 401, message: "Please login" });
+    next({ status: 401, success:false, message: "Please login" });
   }
 };
 

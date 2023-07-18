@@ -44,20 +44,19 @@ const utils_1 = require("../modules/utils");
 const loginSchima_1 = __importDefault(require("../Validation/loginSchima"));
 const passwordSchima_1 = __importDefault(require("../Validation/passwordSchima"));
 const signupSchima_1 = __importDefault(require("../Validation/signupSchima"));
+const profileValidation_1 = __importDefault(require("../Validation/profileValidation"));
 ;
 const signUp = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { username, email, password, confirmPassword, mobile } = req.body;
-        yield signupSchima_1.default.validate({ username, email, password, confirmPassword, mobile }, { abortEarly: false });
-        if (password != confirmPassword)
-            throw { message: "passwords are not match" };
+        const { username, email, password, mobile } = req.body;
+        yield signupSchima_1.default.validate({ username, email, password, mobile }, { abortEarly: false });
         if (yield userModel_1.default.findOne({ $or: [{ username }, { email }, { mobile }] }))
             throw { message: "user already exist" };
-        yield userModel_1.default.create({ username, email, password: (0, utils_1.hashString)(password), confirmPassword, mobile });
+        yield userModel_1.default.create({ username, email, password: (0, utils_1.hashString)(password), mobile });
         res.status(201).json({ status: 201, success: true, message: "User created :)" });
     }
     catch (error) {
-        next({ status: 400, message: error.message || error.errors });
+        next({ status: 400, success: false, message: error.message || error.errors });
     }
 });
 exports.signUp = signUp;
@@ -77,38 +76,40 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         res.json(userSend);
     }
     catch (error) {
-        next({ status: 400, message: error.message || error.errors });
+        next({ status: 400, success: false, message: error.message || error.errors });
     }
 });
 exports.login = login;
 const changePassword = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { oldPassword, newPassword, confirmNewPassword } = req.body;
+        const { oldPassword, newPassword } = req.body;
         const user = yield userModel_1.default.findOne({ username: req.username }, { "createdAt": 0, "updatedAt": 0, "__v": 0 });
         if (!user)
             throw { message: "user not found" };
         if (!(0, utils_1.compareHashedString)(oldPassword, user.password))
             throw { message: "old password is wrong" };
-        if (newPassword != confirmNewPassword)
-            throw { message: "passwords are not match" };
-        yield passwordSchima_1.default.validate({ newPassword, confirmNewPassword });
+        yield passwordSchima_1.default.validate({ newPassword });
+        const result = yield userModel_1.default.updateOne({ username: req.username }, { password: (0, utils_1.hashString)(newPassword) });
         res.status(200).json({ status: 200, success: true, message: "password changed successfully" });
     }
     catch (error) {
-        next({ status: 400, message: error.message || error.errors });
+        next({ status: 400, success: false, message: error.message || error.errors });
     }
 });
 exports.changePassword = changePassword;
 const changeProfile = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { name, family, age, address } = req.body;
-        const result = yield userModel_1.default.updateOne({ username: req.username }, { name, family, age, address });
+        const { firstName, lastName, age, city, gender } = req.body;
+        yield profileValidation_1.default.validate({ firstName, lastName, age, city }, { abortEarly: false });
+        if (!["male", "female"].includes(gender))
+            throw { status: 403, success: false, message: "Gender must be select between male or female" };
+        const result = yield userModel_1.default.updateOne({ username: req.username }, { firstName, lastName, age, city, gender });
         if (!result.modifiedCount)
             throw { message: "profile update failed" };
         res.status(200).json({ status: 200, success: true, message: "profile update successfully" });
     }
     catch (error) {
-        next({ status: 400, message: error.message || error.errors });
+        next({ status: 400, success: false, message: error.message || error.errors });
     }
 });
 exports.changeProfile = changeProfile;
@@ -118,7 +119,7 @@ const getUsers = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         res.status(200).json(users);
     }
     catch (error) {
-        next({ message: error.message });
+        next({ success: false, message: error.message });
     }
 });
 exports.getUsers = getUsers;
@@ -133,7 +134,7 @@ const getUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
         res.status(200).json(user);
     }
     catch (error) {
-        next({ message: error.message });
+        next({ success: false, message: error.message });
     }
 });
 exports.getUser = getUser;
@@ -143,7 +144,7 @@ const deleteAccout = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         res.status(200).json(result);
     }
     catch (error) {
-        next({ message: error.message });
+        next({ success: false, message: error.message });
     }
 });
 exports.deleteAccout = deleteAccout;
@@ -155,7 +156,7 @@ const getProfile = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         res.status(200).json(user);
     }
     catch (error) {
-        next({ status: 400, message: error.message });
+        next({ status: 400, success: false, message: error.message });
     }
 });
 exports.getProfile = getProfile;
@@ -167,7 +168,7 @@ const saveImage = (req, res, next) => __awaiter(void 0, void 0, void 0, function
         res.status(200).json({ status: 200, success: true, message: "Image uploaded successfully" });
     }
     catch (error) {
-        next({ status: 400, message: error.message });
+        next({ status: 400, success: false, message: error.message });
     }
 });
 exports.saveImage = saveImage;
@@ -192,7 +193,7 @@ const getOtp = (req, res, next) => __awaiter(void 0, void 0, void 0, function* (
         res.status(200).json({ status: 200, success: true, message: "enter your OTP code" });
     }
     catch (error) {
-        next({ status: 400, message: error.message || error.errors });
+        next({ status: 400, success: false, message: error.message || error.errors });
     }
 });
 exports.getOtp = getOtp;
@@ -215,7 +216,7 @@ const checkOtp = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         res.json(userSend);
     }
     catch (error) {
-        next({ status: 400, message: error.message });
+        next({ status: 400, success: false, message: error.message });
     }
 });
 exports.checkOtp = checkOtp;

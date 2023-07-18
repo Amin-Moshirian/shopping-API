@@ -1,25 +1,25 @@
 import { Schema, Types, model } from "mongoose";
 const orderSchema: Schema = new Schema(
     {
-        orderItem: [
+        orderItems: [
             {
                 product: {
                     name: { type: String, require: true },
-                    color: { type: [String], require: true },
-                    description: { type: String, require: true },
+                    color: { type: String, require: true },
+                    // description: { type: String, require: true },
                     category: { type: String, require: true },
                     price: { type: Number, require: true },
                     rating: { type: Number, require: true },
                     brand: { type: String, require: true },
                     countInStock: { type: Number, default: false, require: true },
-                    numReviews: { type: String, require: true },
+                    // numReviews: { type: String, require: true },
                     image: { type: String, require: true },
                 },
                 qty: { type: Number, require: true }
             },
         ],
         shippingAddress: {
-            name: { type: String, required: true },
+            // name: { type: String, required: true },
             address: { type: String, required: true },
             city: { type: String, required: true },
             postalCode: { type: String, required: true },

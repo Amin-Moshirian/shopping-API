@@ -6,7 +6,7 @@ import productModel from "../model/productModel";
 declare module 'express-serve-static-core' {
     interface Request {
         order: {
-            orderItem: OrderItem;
+            orderItems: OrderItems;
             shippingAddress: ShippingAddress;
             paymentMethod: string;
             totalPrice: number;
@@ -22,8 +22,8 @@ type User = {
     password: string;
     confirmPassword: string;
     mobile: string;
-    name: string;
-    family: string;
+    firstName: string;
+    lastName: string;
     age: number;
     address: string;
     modifiedCount: number;
@@ -40,7 +40,7 @@ type User = {
     connection: string;
 };
 
-type OrderItem = {
+type OrderItems = {
     product: {
         color: string[];
         countInStock: number;
@@ -71,7 +71,7 @@ type ShippingAddress = {
 
 
 type Body = {
-    orderItem: OrderItem;
+    orderItems: OrderItems;
     shippingAddress: ShippingAddress;
     paymentMethod: string;
 };
@@ -95,11 +95,11 @@ type Product = {
 
 const orderValidation = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { orderItem, shippingAddress, paymentMethod }: Body = JSON.parse(JSON.stringify(req.body));
+        const { orderItems, shippingAddress, paymentMethod }: Body = JSON.parse(JSON.stringify(req.body));
         await shippingAddressValidaton.validate(shippingAddress, { abortEarly: false });
         if (!["cash", "online"].includes(paymentMethod)) throw { message: "payment method is not allowed" };
         let totalPrice: number = 0
-        for (const item of orderItem) {
+        for (const item of orderItems) {
             if (!isValidObjectId(item.product)) throw { message: "productId is not valid" };
             const prod: Product | null = await productModel.findOne({ _id: item.product }, { __v: 0, createdAt: 0, updatedAt: 0 });
             if (!prod) throw { message: "product not found" };
@@ -109,12 +109,12 @@ const orderValidation = async (req: Request, res: Response, next: NextFunction):
         };
         totalPrice += 5;
         const orderSubmitData: {
-            orderItem: OrderItem;
+            orderItems: OrderItems;
             shippingAddress: ShippingAddress;
             paymentMethod: string;
             totalPrice: number;
             user: User;
-        } = { orderItem, shippingAddress, paymentMethod, totalPrice, user: req.username };
+        } = { orderItems, shippingAddress, paymentMethod, totalPrice, user: req.username };
         req.order = orderSubmitData;
         next();
     } catch (error: any) {

@@ -1,7 +1,7 @@
 import { string, object } from "yup"
 
 const shippingAddressValidaton = object().shape({
-    name:string().min(3),
+    // name:string().min(3),
     address: string().min(10).required(),
     postalCode: string().length(10).required(),
     city: string().min(3).required(),

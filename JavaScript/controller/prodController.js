@@ -24,7 +24,7 @@ const addProd = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
         res.status(201).json({ status: 201, success: true, message: "product created" });
     }
     catch (error) {
-        next({ status: 400, message: error.message || error.errors });
+        next({ status: 400, success: false, message: error.message || error.errors });
     }
 });
 exports.addProd = addProd;
@@ -36,7 +36,7 @@ const getProducts = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
         res.status(200).json(products);
     }
     catch (error) {
-        next({ status: 400, message: error.message });
+        next({ status: 400, success: false, message: error.message });
     }
     ;
 });
@@ -50,7 +50,7 @@ const getOneProduct = (req, res, next) => __awaiter(void 0, void 0, void 0, func
         res.status(200).json(product);
     }
     catch (error) {
-        next({ status: 400, message: error.message });
+        next({ status: 400, success: false, message: error.message });
     }
     ;
 });
@@ -69,7 +69,7 @@ const editProd = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         res.status(200).json({ status: 200, success: true, message: "product updated" });
     }
     catch (error) {
-        next({ status: 400, message: error.message });
+        next({ status: 400, success: false, message: error.message });
     }
     ;
 });
@@ -81,7 +81,7 @@ const searchProd = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         res.json(result);
     }
     catch (error) {
-        next({ status: 400, message: error.message });
+        next({ status: 400, success: false, message: error.message });
     }
     ;
 });
@@ -95,7 +95,7 @@ const deleteProd = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         res.status(200).json({ status: 200, success: true, message: "product deleted successfully" });
     }
     catch (error) {
-        next({ status: 400, message: error.message });
+        next({ status: 400, success: false, message: error.message });
     }
 });
 exports.deleteProd = deleteProd;
@@ -109,23 +109,26 @@ const checkproductId = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         next();
     }
     catch (error) {
-        next({ message: error.message });
+        next({ success: false, message: error.message });
     }
 });
 exports.checkproductId = checkproductId;
 const saveImage = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const images = [];
+        const image = req.file;
         const { _id } = req.params;
-        for (const item of req.files) {
-            images.push(req.protocol + "://" + req.get("host") + item.path.slice(17).replaceAll("\\", "/"));
-        }
-        ;
-        yield productModel_1.default.updateOne({ _id }, { $push: { images } });
+        const imagePath = req.protocol + "://" + req.get("host") + image.path.slice(17).replaceAll("\\", "/");
+        yield productModel_1.default.updateOne({ _id }, { image: imagePath });
+        // const images: string[] = [];
+        // for (const item of req.files) {
+        //     console.log(item);
+        //     images.push(req.protocol + "://" + req.get("host") + item.path.slice(17).replaceAll("\\", "/"));
+        // };
+        // await productModel.updateOne({ _id }, { $push: { images } })
         res.status(200).json({ success: true, message: "product images uploaded" });
     }
     catch (error) {
-        next({ message: error.message });
+        next({ success: false, message: error.message });
     }
     ;
 });

@@ -23,7 +23,7 @@ const submitOrder = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
         res.status(201).json({ status: 201, success: true, message: "your order submited successfully" });
     }
     catch (error) {
-        next({ status: 500, message: error.message });
+        next({ status: 500, success: false, message: error.message });
     }
     ;
 });
@@ -39,20 +39,20 @@ const getOneOrder = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
         res.status(200).json(result);
     }
     catch (error) {
-        next({ status: 400, message: error.message });
+        next({ status: 400, success: false, message: error.message });
     }
     ;
 });
 exports.getOneOrder = getOneOrder;
 const getOrders = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield orderModel_1.default.find({ user: req.username }, { user: 0, __v: 0, createdAt: 0, updatedAt: 0, shippingAddress: 0 });
+        const result = yield orderModel_1.default.find({ user: req.username }, { user: 0, __v: 0, createdAt: 0, updatedAt: 0 });
         if (!result.length)
             throw { message: "no order submitted" };
         res.status(200).json(result);
     }
     catch (error) {
-        next({ status: 400, message: error.message });
+        next({ status: 400, success: false, message: error.message });
     }
     ;
 });

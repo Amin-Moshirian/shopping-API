@@ -9,7 +9,7 @@ const checkLogin = (req, res, next) => {
         next();
     }
     catch (error) {
-        next({ status: 401, message: "Please login" });
+        next({ status: 401, success: false, message: "Please login" });
     }
 };
 exports.default = checkLogin;

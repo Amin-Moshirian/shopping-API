@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const yup_1 = require("yup");
 const shippingAddressValidaton = (0, yup_1.object)().shape({
-    name: (0, yup_1.string)().min(3),
+    // name:string().min(3),
     address: (0, yup_1.string)().min(10).required(),
     postalCode: (0, yup_1.string)().length(10).required(),
     city: (0, yup_1.string)().min(3).required(),
